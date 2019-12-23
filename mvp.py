@@ -70,11 +70,18 @@ year_end = df.index.max()
 step_size = 5
 year_steps = range(year_start, year_end - step_size, step_size)
 year_steps_shifted = range(year_start + step_size, year_end, step_size)
+
 for beginning, end in zip(year_steps, year_steps_shifted):
-    print(beginning, end)
+    print(beginning, end-1)
     df_returns = df.loc[beginning:end, :].head()
     print(str(df_returns))
-    print(get_cum_net_returns(df_returns.to_numpy()))
+    df_cum_returns = (
+        pd.DataFrame(data=get_cum_net_returns(df_returns.to_numpy() + 1),
+                    index=range(beginning, end))
+    )
+    print(get_cum_net_returns(df_returns.to_numpy())))
+    print(str(df_cum_returns.head()))
+    
 
 #for year in range(df.index.min(), df.index.max()):
 #    print("It is the end of the year {}.".format(year))
