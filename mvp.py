@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+import matplotlib.pyplot as plt
 
 df = pd.read_csv('./data_input/histretSP.csv')
 
@@ -26,6 +27,19 @@ def get_cum_net_returns(net_returns: np.array):
             )
 
     return cum_gross_returns - 1
+
+def make_plot_df(df: pd.DataFrame):
+    """
+    Make dataframe for plotting of cumulative gross returns.
+    
+    df:
+        contains net returns over time (row-wise) and by asset (column-wise).
+    """
+    index_old = df_cum_returns.index        
+    index_new = range(index_old.min() - 1, index_old.max())
+    df_plot = df.reindex(index_new).fillna(0) 
+    df_plot = (df_plot + 1) * 100
+    return df_plot
 
 def get_asset_loadings():
     question = "What percentage of your portfolio do you want to invest in?"
@@ -76,11 +90,12 @@ for beginning, end in zip(year_steps, year_steps_shifted):
     df_returns = df.loc[beginning:end, :].head()
     print(str(df_returns))
     df_cum_returns = (
-        pd.DataFrame(data=get_cum_net_returns(df_returns.to_numpy() + 1),
+        pd.DataFrame(data=get_cum_net_returns(df_returns.to_numpy()),
                     index=range(beginning, end))
     )
-    print(get_cum_net_returns(df_returns.to_numpy())))
     print(str(df_cum_returns.head()))
+    make_plot_df(df_cum_returns).plot()
+    plt.show()
     
 
 #for year in range(df.index.min(), df.index.max()):
