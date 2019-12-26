@@ -8,6 +8,22 @@ for col in ['snp500', '3mon', '10yr']:
     df[col] = df[col].str.rstrip('%').astype('float') / 100.0
 df = df.set_index('year')
 
+
+def get_portfolio_returns(asset_returns: np.array, 
+                          asset_loadings: np.array,
+                          n_assets: int,
+                          n_time_periods: int):
+    portfolio_returns = (
+        np.matmul(
+            asset_returns.reshape(n_time_periods, n_assets),
+            asset_loadings.reshape(n_assets, 1)
+            )
+    )
+    
+    return portfolio_returns
+                                                    
+
+
 def get_cum_net_returns(net_returns: np.array):
     """
     Get array of cumulative net returns.
@@ -31,6 +47,9 @@ def get_cum_net_returns(net_returns: np.array):
 def make_plot_df(df: pd.DataFrame):
     """
     Make dataframe for plotting of cumulative gross returns.
+
+    Add the year previous to the first entry as base with value 1.
+    Rescale everything to 100.
     
     df:
         contains net returns over time (row-wise) and by asset (column-wise).
@@ -79,6 +98,16 @@ class portfolio:
 my_portfolio = portfolio(1000,  np.array([0.25, 0.25, 0.5]))
 my_asset_markets = asset_markets(df_asset_returns=df) 
 
+df_all_returns = df.copy()
+df_all_returns["portfolio"] = (
+    get_portfolio_returns(
+        df.to_numpy(), 
+        np.array([0.25, 0.25, 0.5]),
+        n_assets=3, 
+        n_time_periods=df_all_returns.shape[0]
+        )
+        )
+
 year_start = df.index.min()
 year_end = df.index.max()
 step_size = 5
@@ -87,12 +116,13 @@ year_steps_shifted = range(year_start + step_size, year_end, step_size)
 
 for beginning, end in zip(year_steps, year_steps_shifted):
     print(beginning, end-1)
-    df_returns = df.loc[beginning:end, :].head()
+    df_returns = df_all_returns.loc[beginning:end, :].head()
     print(str(df_returns))
     df_cum_returns = (
         pd.DataFrame(data=get_cum_net_returns(df_returns.to_numpy()),
                     index=range(beginning, end))
     )
+    df_cum_returns.columns = df_returns.columns
     print(str(df_cum_returns.head()))
     make_plot_df(df_cum_returns).plot()
     plt.show()
