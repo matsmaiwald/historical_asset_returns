@@ -2,11 +2,6 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
-df = pd.read_csv('./data_input/histretSP.csv')
-
-for col in ['snp500', '3mon', '10yr']:
-    df[col] = df[col].str.rstrip('%').astype('float') / 100.0
-df = df.set_index('year')
 
 
 def get_portfolio_returns(asset_returns: np.array, 
@@ -95,40 +90,48 @@ class portfolio:
             )
         self.wealth = self.wealth * (1 + portfolio_return)
 
-my_portfolio = portfolio(1000,  np.array([0.25, 0.25, 0.5]))
-my_asset_markets = asset_markets(df_asset_returns=df) 
+if __name__ == "__main__":
+    df = pd.read_csv('./data_input/histretSP.csv')
 
-df_all_returns = df.copy()
-df_all_returns["portfolio"] = (
-    get_portfolio_returns(
-        df.to_numpy(), 
-        np.array([0.25, 0.25, 0.5]),
-        n_assets=3, 
-        n_time_periods=df_all_returns.shape[0]
+    for col in ['snp500', '3mon', '10yr']:
+        df[col] = df[col].str.rstrip('%').astype('float') / 100.0
+    df = df.set_index('year')
+    portfolio_allocation = np.array([0.25, 0.25, 0.5])
+
+    my_portfolio = portfolio(1000,  portfolio_allocation)
+    my_asset_markets = asset_markets(df_asset_returns=df) 
+
+    df_all_returns = df.copy()
+    df_all_returns["portfolio"] = (
+        get_portfolio_returns(
+            df.to_numpy(), 
+            portfolio_allocation,
+            n_assets=3, 
+            n_time_periods=df_all_returns.shape[0]
+            )
+            )
+
+    year_start = df.index.min()
+    year_end = df.index.max()
+    step_size = 5
+    year_steps = range(year_start, year_end - step_size, step_size)
+    year_steps_shifted = range(year_start + step_size, year_end, step_size)
+
+    dfs = {}
+
+    for beginning, end in zip(year_steps, year_steps_shifted):
+        print(beginning, end-1)
+        df_returns = df_all_returns.loc[beginning:end, :].head()
+        # print(str(df_returns))
+        df_cum_returns = (
+            pd.DataFrame(data=get_cum_net_returns(df_returns.to_numpy()),
+                        index=range(beginning, end))
         )
-        )
-
-year_start = df.index.min()
-year_end = df.index.max()
-step_size = 5
-year_steps = range(year_start, year_end - step_size, step_size)
-year_steps_shifted = range(year_start + step_size, year_end, step_size)
-
-dfs = {}
-
-for beginning, end in zip(year_steps, year_steps_shifted):
-    print(beginning, end-1)
-    df_returns = df_all_returns.loc[beginning:end, :].head()
-    # print(str(df_returns))
-    df_cum_returns = (
-        pd.DataFrame(data=get_cum_net_returns(df_returns.to_numpy()),
-                    index=range(beginning, end))
-    )
-    df_cum_returns.columns = df_returns.columns
-    # print(str(df_cum_returns.head()))
-    # make_plot_df(df_cum_returns).plot()
-    # plt.show()
-    dfs[str(beginning)] = make_plot_df(df_cum_returns)
+        df_cum_returns.columns = df_returns.columns
+        # print(str(df_cum_returns.head()))
+        # make_plot_df(df_cum_returns).plot()
+        # plt.show()
+        dfs[str(beginning)] = make_plot_df(df_cum_returns)
     
 
 #for year in range(df.index.min(), df.index.max()):
