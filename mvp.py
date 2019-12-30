@@ -114,18 +114,21 @@ step_size = 5
 year_steps = range(year_start, year_end - step_size, step_size)
 year_steps_shifted = range(year_start + step_size, year_end, step_size)
 
+dfs = {}
+
 for beginning, end in zip(year_steps, year_steps_shifted):
     print(beginning, end-1)
     df_returns = df_all_returns.loc[beginning:end, :].head()
-    print(str(df_returns))
+    # print(str(df_returns))
     df_cum_returns = (
         pd.DataFrame(data=get_cum_net_returns(df_returns.to_numpy()),
                     index=range(beginning, end))
     )
     df_cum_returns.columns = df_returns.columns
-    print(str(df_cum_returns.head()))
-    make_plot_df(df_cum_returns).plot()
-    plt.show()
+    # print(str(df_cum_returns.head()))
+    # make_plot_df(df_cum_returns).plot()
+    # plt.show()
+    dfs[str(beginning)] = make_plot_df(df_cum_returns)
     
 
 #for year in range(df.index.min(), df.index.max()):
