@@ -51,8 +51,8 @@ def make_plot_df(df: pd.DataFrame):
     df:
         contains net returns over time (row-wise) and by asset (column-wise).
     """
-    index_old = df_cum_returns.index        
-    index_new = range(index_old.min() - 1, index_old.max())
+    index_old = df.index        
+    index_new = range(index_old.min() - 1, index_old.max() + 1)
     df_plot = df.reindex(index_new).fillna(0) 
     df_plot = (df_plot + 1) * 100
     return df_plot
@@ -146,8 +146,8 @@ if __name__ == "__main__":
     year_start = params["year_start"]
     year_end = params["year_end"]
     step_size = params["year_step_size"]
-    year_steps = range(year_start, year_end - step_size, step_size)
-    year_steps_shifted = range(year_start + step_size, year_end, step_size)
+    year_steps = range(year_start, year_end, step_size)
+    year_steps_shifted = range(year_start + step_size, year_end + step_size, step_size)
 
     dfs = {}
 
