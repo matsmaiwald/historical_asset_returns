@@ -1,7 +1,9 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-
+import plotly
+import plotly.graph_objs as go 
+from datetime import datetime
 
 
 def get_portfolio_returns(asset_returns: np.array, 
@@ -72,6 +74,30 @@ def get_asset_loadings():
         )
     return loadings
 
+def create_scatter(df: pd.DataFrame, y_col_name: str, y_display_name: str):
+    """Create a scatter plot plotly object."""
+    graph = (
+        go.Scatter(
+            x=df.index,
+            y=df[y_col_name],
+            name=y_display_name,
+            mode="lines",
+            visible=False
+        )
+    )
+    return graph
+
+
+def create_booleans(loc_of_true: int, total_length: int):
+    """
+    Create a list of booleans with only one True entry and False entries otherwise.
+    
+    loc_of_true: index position of the True entry.
+    
+    total_length: length of boolean list to be created. 
+    """
+    return [True if ind == loc_of_true else False for ind, x in enumerate(range(total_length + 1))]
+
 class asset_markets:
     def __init__(self, df_asset_returns):
         self.df_asset_returns = df_asset_returns
@@ -133,6 +159,46 @@ if __name__ == "__main__":
         # plt.show()
         dfs[str(beginning)] = make_plot_df(df_cum_returns)
     
+	
+    # create start points in time for each different plot
+    start_points = list(year_steps)
+
+    # create a list of scatter plot objects
+    data = [
+        create_scatter(
+            dfs[str(year)], 
+            y_col_name = "portfolio", 
+            y_display_name="portfolio") for year in start_points
+    ]
+    
+    # create a list of dictionaries which will be passed in as options for plotly's buttons
+    button_list = [dict(
+        label = year,
+        method = 'update',
+        args = [
+            {'visible': create_booleans(loc_of_true=ind, total_length=len(start_points))},
+            {'title': year}
+        ]
+    ) for ind, year in enumerate(start_points)]
+
+    # create the update menus which allow to switch between different plots
+    updatemenus = list(
+        [
+        dict(active=-1,
+             buttons=list(button_list),
+        )
+    ]
+    )
+
+    # create the layout which uses the update menus
+    layout = dict(title="Cumulative Returns", 
+                  showlegend=True,
+                  updatemenus=updatemenus
+                 )
+
+    # create the final figure
+    fig = dict(data=data, layout=layout)
+
 
 #for year in range(df.index.min(), df.index.max()):
 #    print("It is the end of the year {}.".format(year))
