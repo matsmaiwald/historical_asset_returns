@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import plotly
 import plotly.graph_objs as go 
 from datetime import datetime
-
+from parameters import params
 
 def get_portfolio_returns(asset_returns: np.array, 
                           asset_loadings: np.array,
@@ -122,7 +122,13 @@ if __name__ == "__main__":
     for col in ['snp500', '3mon', '10yr']:
         df[col] = df[col].str.rstrip('%').astype('float') / 100.0
     df = df.set_index('year')
-    portfolio_allocation = np.array([0.25, 0.25, 0.5])
+    portfolio_allocation = np.array(
+        [
+        params["share_snp500"], 
+        params["share_3mon"],
+        params["share_10yr"], 
+        ]
+        )
 
     my_portfolio = portfolio(1000,  portfolio_allocation)
     my_asset_markets = asset_markets(df_asset_returns=df) 
@@ -137,9 +143,9 @@ if __name__ == "__main__":
             )
             )
 
-    year_start = df.index.min()
-    year_end = df.index.max()
-    step_size = 5
+    year_start = params["year_start"]
+    year_end = params["year_end"]
+    step_size = params["year_step_size"]
     year_steps = range(year_start, year_end - step_size, step_size)
     year_steps_shifted = range(year_start + step_size, year_end, step_size)
 
