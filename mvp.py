@@ -100,7 +100,21 @@ class portfolio:
             )
         self.wealth = self.wealth * (1 + portfolio_return)
 
+
+def make_confidence_interval_graph(df: pd.DataFrame, color: str="green") -> plt.figure:
+    import matplotlib.pyplot as plt
+    fig, ax = plt.subplots(figsize=(10,10))
+
+    df.iloc[2].plot(ax=ax, color="green")
+    ax.fill_between(df.columns, df.iloc[0], df.iloc[1], alpha=0.3, color=color)
+    ax.fill_between(df.columns, df.iloc[1], df.iloc[2], alpha=0.6, color=color)
+    ax.fill_between(df.columns, df.iloc[2], df.iloc[3], alpha=0.6, color=color)
+    ax.fill_between(df.columns, df.iloc[3], df.iloc[4], alpha=0.3, color=color)
+    plt.close(fig)
+    return fig
+
 if __name__ == "__main__":
+
     df = pd.read_csv('./data_input/histretSP.csv')
 
     for col in ['snp500', '3mon', '10yr']:
