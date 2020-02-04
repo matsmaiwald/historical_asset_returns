@@ -57,22 +57,6 @@ def make_plot_df(df: pd.DataFrame):
     df_plot = (df_plot + 1) * 100
     return df_plot
 
-def get_asset_loadings():
-    question = "What percentage of your portfolio do you want to invest in?"
-    print("SnP500 loading")
-    loading_snp = input("Please enter a decimal fraction.")
-    print("3mon loading")
-    loading_3mon = input("Please enter a decimal fraction.")
-    print("10yr loading")
-    loading_10yr = input("Please enter a decimal fraction.")
-    loadings = np.array(
-        [
-        loading_snp,
-        loading_3mon,
-        loading_10yr
-        ]
-        )
-    return loadings
 
 def create_scatter(df: pd.DataFrame, y_col_name: str, y_display_name: str):
     """Create a scatter plot plotly object."""
@@ -143,75 +127,3 @@ if __name__ == "__main__":
             )
             )
 
-    year_start = params["year_start"]
-    year_end = params["year_end"]
-    step_size = params["year_step_size"]
-    year_steps = range(year_start, year_end, step_size)
-    year_steps_shifted = range(year_start + step_size, year_end + step_size, step_size)
-
-    dfs = {}
-
-    for beginning, end in zip(year_steps, year_steps_shifted):
-        print(beginning, end-1)
-        df_returns = df_all_returns.loc[beginning:end, :].head()
-        # print(str(df_returns))
-        df_cum_returns = (
-            pd.DataFrame(data=get_cum_net_returns(df_returns.to_numpy()),
-                        index=range(beginning, end))
-        )
-        df_cum_returns.columns = df_returns.columns
-        # print(str(df_cum_returns.head()))
-        # make_plot_df(df_cum_returns).plot()
-        # plt.show()
-        dfs[str(beginning)] = make_plot_df(df_cum_returns)
-    
-	
-    # create start points in time for each different plot
-    start_points = list(year_steps)
-
-    # create a list of scatter plot objects
-    data = [
-        create_scatter(
-            dfs[str(year)], 
-            y_col_name = "portfolio", 
-            y_display_name="portfolio") for year in start_points
-    ]
-    
-    # create a list of dictionaries which will be passed in as options for plotly's buttons
-    button_list = [dict(
-        label = year,
-        method = 'update',
-        args = [
-            {'visible': create_booleans(loc_of_true=ind, total_length=len(start_points))},
-            {'title': year}
-        ]
-    ) for ind, year in enumerate(start_points)]
-
-    # create the update menus which allow to switch between different plots
-    updatemenus = list(
-        [
-        dict(active=-1,
-             buttons=list(button_list),
-        )
-    ]
-    )
-
-    # create the layout which uses the update menus
-    layout = dict(title="Cumulative Returns", 
-                  showlegend=True,
-                  updatemenus=updatemenus
-                 )
-
-    # create the final figure
-    fig = dict(data=data, layout=layout)
-
-
-#for year in range(df.index.min(), df.index.max()):
-#    print("It is the end of the year {}.".format(year))
-#    current_returns = my_asset_markets.yield_returns(year=year)
-#    my_portfolio.update_wealth(current_returns)
-#    print("The portfolio has a value of {}."
-#    .format(round(my_portfolio.wealth, 0)))
-#    change_loadings = input("Would you like to change your asset loadings? (y/n)")
-#    if change_loadings == "y":
-#        my_portfolio.loadings = get_asset_loadings()
