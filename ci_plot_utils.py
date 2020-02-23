@@ -51,6 +51,57 @@ def make_plot_df(df: pd.DataFrame):
     df_plot = (df_plot + 1) * 100
     return df_plot
 
+def get_cumulative_returns_matrix(df_returns: pd.DataFrame, 
+                                  year_start: int, 
+                                  year_end: int, 
+                                  year_step_size: int,
+                                  asset_of_interest: str
+                                 ) -> pd.DataFrame:
+    """
+    Get a matrix of historical k-year returns for each year in a date range.
+    
+    df_returns: contains returns by year (rows) and asset (columns).
+    year_start: first year to consider data for.
+    year_end: last year to consider.
+    year_step_size: number of years to calculate cumulative returns for at a time.
+    asset_of_interest: column name of asset of interest in df_returns.
+    
+    """
+    # initialise matrix
+    return_mat = np.zeros((year_end - year_start + 1 - year_step_size + 1, year_step_size + 1))
+    
+    for first_year in range(year_start, year_end + 1 - year_step_size + 1):
+        
+        end = first_year + year_step_size - 1
+        df_temp = df_returns.loc[first_year:end, :]
+
+        # get cumulative returns
+        df_cum_returns = (pd.DataFrame(data=get_cum_net_returns(df_temp.to_numpy()),
+                                       index=range(first_year, end + 1))
+                         )
+        df_cum_returns.columns = df_temp.columns
+        
+        # normalise to start at 100
+        df_cum_returns_normalised = make_plot_df(df_cum_returns)
+
+        # assign to row in final matrix
+        row_idx = first_year - year_start
+        return_mat[row_idx,:] = df_cum_returns_normalised[asset_of_interest].to_numpy().round(2)
+    
+    return return_mat
+
+def make_quantile_mat(return_mat: np.array, quantiles: list):
+    """Make a matrix containing different quantiles of the cumulative return matrix."""
+    n_periods = return_mat.shape[1]
+    n_quantiles = len(quantiles)
+    quantile_mat = np.zeros([n_quantiles, n_periods])
+    
+    for col_idx in range(quantile_mat.shape[1]): # iterate over columns 
+        for counter, quantile in enumerate(quantiles):
+            quantile_mat[counter, col_idx] = np.quantile(return_mat[:,col_idx], quantile)
+    
+    return quantile_mat
+
 def make_confidence_interval_graph(df: pd.DataFrame, color: str="green") -> plt.figure:
     import matplotlib.pyplot as plt
     fig, ax = plt.subplots(figsize=(10,10))
