@@ -104,12 +104,33 @@ def make_quantile_mat(return_mat: np.array, quantiles: list):
 
 def make_confidence_interval_graph(df: pd.DataFrame, color: str="green") -> plt.figure:
     import matplotlib.pyplot as plt
+    from matplotlib.patches import Patch
     fig, ax = plt.subplots(figsize=(10,10))
+    cmap = plt.cm.RdYlGn
+    colour_mapping = {"bottom quartile": cmap(0.1), 
+                      "2nd quartile": cmap(0.33),
+                      "3rd quartile": cmap(0.66),
+                      "top quartile": cmap(1.0)
+                         }
 
-    df.iloc[2].plot(ax=ax, color="green")
-    ax.fill_between(df.columns, df.iloc[0], df.iloc[1], alpha=0.3, color=color)
-    ax.fill_between(df.columns, df.iloc[1], df.iloc[2], alpha=0.6, color=color)
-    ax.fill_between(df.columns, df.iloc[2], df.iloc[3], alpha=0.6, color=color)
-    ax.fill_between(df.columns, df.iloc[3], df.iloc[4], alpha=0.3, color=color)
+    #df.iloc[2].plot(ax=ax, color="green")
+    ax.fill_between(df.columns, df.iloc[0], df.iloc[1], alpha=0.8, color=colour_mapping["bottom quartile"])
+    ax.fill_between(df.columns, df.iloc[1], df.iloc[2], alpha=0.8, color=colour_mapping["2nd quartile"])
+    ax.fill_between(df.columns, df.iloc[2], df.iloc[3], alpha=0.8, color=colour_mapping["3rd quartile"])
+    ax.fill_between(df.columns, df.iloc[3], df.iloc[4], alpha=0.8, color=colour_mapping["top quartile"])
+    
+    ax.grid(True)
+    
+    ax.set_xlabel('Years since inception of portfolio')
+    ax.set_ylabel('Porfolio value in %')
+    legend_elements = [
+        Patch(color=colour_mapping["top quartile"], label="top quartile"),               
+        Patch(color=colour_mapping["3rd quartile"], label="3rd quartile"),
+        Patch(color=colour_mapping["2nd quartile"], label="2nd quartile"),
+        Patch(color=colour_mapping["bottom quartile"], label="bottom quartile"),
+                      ]
+
+
+    ax.legend(handles=legend_elements, loc='upper left')
     plt.close(fig)
     return fig
