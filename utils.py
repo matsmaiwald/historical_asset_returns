@@ -107,27 +107,31 @@ def make_confidence_interval_graph(df: pd.DataFrame, color: str="green") -> plt.
     from matplotlib.patches import Patch
     fig, ax = plt.subplots(figsize=(10,10))
     cmap = plt.cm.RdYlGn
-    colour_mapping = {"bottom quartile": cmap(0.1), 
-                      "2nd quartile": cmap(0.33),
-                      "3rd quartile": cmap(0.66),
-                      "top quartile": cmap(1.0)
+    colour_mapping = {
+        "top_10": cmap(1.0),
+        "50-90": cmap(0.66),
+        "10-50": cmap(0.33),
+        "bottom_10": cmap(0.1), 
                          }
 
     #df.iloc[2].plot(ax=ax, color="green")
-    ax.fill_between(df.columns, df.iloc[0], df.iloc[1], alpha=0.8, color=colour_mapping["bottom quartile"])
-    ax.fill_between(df.columns, df.iloc[1], df.iloc[2], alpha=0.8, color=colour_mapping["2nd quartile"])
-    ax.fill_between(df.columns, df.iloc[2], df.iloc[3], alpha=0.8, color=colour_mapping["3rd quartile"])
-    ax.fill_between(df.columns, df.iloc[3], df.iloc[4], alpha=0.8, color=colour_mapping["top quartile"])
+    ax.fill_between(df.columns, df.iloc[3], df.iloc[4], alpha=0.8, color=colour_mapping["top_10"])
+    ax.fill_between(df.columns, df.iloc[2], df.iloc[3], alpha=0.8, color=colour_mapping["50-90"])
+    ax.fill_between(df.columns, df.iloc[1], df.iloc[2], alpha=0.8, color=colour_mapping["10-50"])
+    ax.fill_between(df.columns, df.iloc[0], df.iloc[1], alpha=0.8, color=colour_mapping["bottom_10"])
+    
+    
+    
     
     ax.grid(True)
     
     ax.set_xlabel('Years since inception of portfolio')
-    ax.set_ylabel('Porfolio value in %')
+    ax.set_ylabel('Porfolio value')
     legend_elements = [
-        Patch(color=colour_mapping["top quartile"], label="top quartile"),               
-        Patch(color=colour_mapping["3rd quartile"], label="3rd quartile"),
-        Patch(color=colour_mapping["2nd quartile"], label="2nd quartile"),
-        Patch(color=colour_mapping["bottom quartile"], label="bottom quartile"),
+        Patch(color=colour_mapping["top_10"], label="top 10 percent"),               
+        Patch(color=colour_mapping["50-90"], label="50th to 90th percentile"),
+        Patch(color=colour_mapping["10-50"], label="10th to 50th percentil"),
+        Patch(color=colour_mapping["bottom_10"], label="bottom 10 percent"),
                       ]
 
 
