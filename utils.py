@@ -126,7 +126,7 @@ def make_confidence_interval_graph(df: pd.DataFrame, color: str="green") -> plt.
     ax.grid(True)
     
     ax.set_xlabel('Years since inception of portfolio')
-    ax.set_ylabel('Porfolio value')
+    ax.set_ylabel('Porfolio value in percent')
     legend_elements = [
         Patch(color=colour_mapping["top_10"], label="top 10 percent"),               
         Patch(color=colour_mapping["50-90"], label="50th to 90th percentile"),
